@@ -1,6 +1,7 @@
 package com.tongxue.springdemo.util;
 
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -13,10 +14,7 @@ import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * @Author zhangtong
@@ -53,7 +51,7 @@ public class CompareDiffUtil {
         Class<?> newObjClass = newObj.getClass();
         Field[] newOjbFields = newObjClass.getDeclaredFields();
         Map<String, Object> diffPropertyMap = Maps.newHashMap();
-        Map<String, PropertyDescriptor> oldPdMap = getPropertyDescriptorMap(oldObj.getClass());
+        Map<String, PropertyDescriptor> oldPdMap = getPropertyDescriptorMap(oldObj);
         for (Field newField : newOjbFields) {
             try {
                 if (hasIgnoreProperty(newField.getName(), ignorePropertyNames)) {
@@ -83,7 +81,11 @@ public class CompareDiffUtil {
                 if (annotation.executeClass() != Object.class) {
                     newObjPropertyValue = convertPropertyValue(newObj, newField, newObjPropertyValue);
                 }
-                diffPropertyMap.put(annotation.name(), newObjPropertyValue);
+                String name = annotation.name();
+                if (StrUtil.isBlank(name)){
+                    name = newField.getName();
+                }
+                diffPropertyMap.put(name, newObjPropertyValue);
             } catch (IntrospectionException e) {
                 throw new RuntimeException(e);
             } catch (IllegalAccessException e) {
@@ -96,7 +98,11 @@ public class CompareDiffUtil {
     }
 
 
-    public static Map<String, PropertyDescriptor> getPropertyDescriptorMap(Class<?> objClass) {
+    public static <T> Map<String, PropertyDescriptor> getPropertyDescriptorMap(T obj) {
+        if (obj == null){
+            return Collections.emptyMap();
+        }
+        Class<?> objClass = obj.getClass();
         Field[] ojbFields = objClass.getDeclaredFields();
         Map<String, PropertyDescriptor> propertyDescriptorMap = new HashMap<>();
         for (Field objField : ojbFields) {
