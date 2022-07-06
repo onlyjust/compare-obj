@@ -1,10 +1,8 @@
 package com.tongxue.springdemo.annotation;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 
+@Documented
 @Target({ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface CompareProperty {
@@ -34,11 +32,15 @@ public @interface CompareProperty {
     String executeMethod() default "";
 
     /**
-     * 执行方法类型（目前未使用，以属性类型为参数）
+     * 执行方法类型（默认以属性类型为参数）
      * @return
      */
     Class<?>[] methodParamType() default {};
 
+    /**
+     * 执行方法参数属性（默认以当前属性值为参数）
+     * @return
+     */
     String[] methodParamField() default {};
 
     /**
@@ -47,6 +49,10 @@ public @interface CompareProperty {
      */
     boolean ignoreNull() default false;
 
+    /**
+     * 忽略比较，直接定义有差异
+     * @return
+     */
     boolean ignoreCompare() default false;
 
     /**
